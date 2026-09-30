@@ -1,0 +1,3391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduPulse — Student Performance Analytics</title>
+
+<style>
+:root{
+  --bg:#07111f;
+  --panel:#0d1a2b;
+  --panel2:#102239;
+  --text:#eef6ff;
+  --muted:#91a6bd;
+  --line:#20354d;
+  --accent:#56d6ff;
+  --accent2:#8b7cff;
+  --good:#46d69a;
+  --warn:#ffc857;
+  --bad:#ff6b7a;
+  --shadow:0 20px 60px rgba(0,0,0,.28);
+  --radius:20px;
+}
+
+body.light{
+  --bg:#eef4fa;
+  --panel:#ffffff;
+  --panel2:#f5f8fc;
+  --text:#102033;
+  --muted:#607086;
+  --line:#d9e2ed;
+  --shadow:0 15px 40px rgba(30,60,90,.12);
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:linear-gradient(135deg,var(--bg),#09182a 55%,#10142d);
+  color:var(--text);
+  min-height:100vh;
+}
+
+body.light{
+  background:linear-gradient(135deg,#edf4fa,#f8fbff);
+}
+
+button,input,select{
+  font:inherit;
+}
+
+button{
+  cursor:pointer;
+}
+
+.app{
+  display:flex;
+  min-height:100vh;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+  width:255px;
+  background:rgba(8,20,35,.9);
+  border-right:1px solid var(--line);
+  padding:22px 16px;
+  position:fixed;
+  inset:0 auto 0 0;
+  z-index:20;
+}
+
+.light .sidebar{
+  background:rgba(255,255,255,.94);
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:8px 8px 26px;
+}
+
+.logo{
+  width:43px;
+  height:43px;
+  border-radius:14px;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  display:grid;
+  place-items:center;
+  color:#07111f;
+  font-weight:900;
+  font-size:19px;
+}
+
+.brand h2{
+  margin:0;
+  font-size:19px;
+}
+
+.brand small{
+  color:var(--muted);
+}
+
+.nav{
+  display:grid;
+  gap:7px;
+}
+
+.nav button{
+  border:1px solid transparent;
+  background:transparent;
+  color:var(--muted);
+  padding:12px 13px;
+  border-radius:12px;
+  text-align:left;
+  font-weight:700;
+  transition:.2s;
+}
+
+.nav button:hover,
+.nav button.active{
+  background:var(--panel2);
+  color:var(--text);
+  border-color:var(--line);
+}
+
+.sidebar-bottom{
+  position:absolute;
+  bottom:20px;
+  left:16px;
+  right:16px;
+}
+
+.tip{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:var(--panel2);
+  font-size:12px;
+  color:var(--muted);
+}
+
+/* MAIN */
+
+.main{
+  margin-left:255px;
+  width:calc(100% - 255px);
+  padding:28px;
+  max-width:1700px;
+}
+
+.topbar{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:15px;
+  margin-bottom:24px;
+}
+
+.eyebrow{
+  color:var(--accent);
+  font-size:12px;
+  font-weight:900;
+  letter-spacing:1.5px;
+  text-transform:uppercase;
+}
+
+h1{
+  font-size:clamp(25px,3vw,38px);
+  margin:4px 0;
+}
+
+.subtitle{
+  color:var(--muted);
+  margin:0;
+}
+
+.actions{
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text);
+  padding:10px 14px;
+  border-radius:11px;
+  font-weight:800;
+  transition:.2s;
+}
+
+.btn:hover{
+  border-color:var(--accent);
+  transform:translateY(-1px);
+}
+
+.btn.primary{
+  background:linear-gradient(135deg,var(--accent),#5b9dff);
+  color:#07111f;
+  border:0;
+}
+
+.btn.danger{
+  color:var(--bad);
+}
+
+/* CARDS */
+
+.grid{
+  display:grid;
+  gap:16px;
+}
+
+.stats{
+  grid-template-columns:repeat(5,minmax(0,1fr));
+}
+
+.card{
+  background:rgba(13,26,43,.86);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:19px;
+}
+
+.light .card{
+  background:rgba(255,255,255,.9);
+}
+
+.stat{
+  position:relative;
+  overflow:hidden;
+}
+
+.stat:after{
+  content:"";
+  position:absolute;
+  width:85px;
+  height:85px;
+  border-radius:50%;
+  background:var(--accent);
+  opacity:.07;
+  right:-28px;
+  top:-28px;
+}
+
+.stat .label{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+
+.stat .value{
+  font-size:29px;
+  font-weight:900;
+  margin-top:7px;
+}
+
+.stat .sub{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+}
+
+.section{
+  margin-top:18px;
+}
+
+.section-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  margin-bottom:12px;
+}
+
+.section-head h2{
+  font-size:18px;
+  margin:0;
+}
+
+.section-head p{
+  margin:3px 0 0;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.two{
+  grid-template-columns:1.25fr .75fr;
+}
+
+.three{
+  grid-template-columns:repeat(3,1fr);
+}
+
+/* FORMS */
+
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:11px;
+}
+
+.field{
+  display:grid;
+  gap:6px;
+}
+
+.field label{
+  font-size:11px;
+  color:var(--muted);
+  font-weight:800;
+}
+
+.field input,
+.field select{
+  width:100%;
+  padding:11px 12px;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  color:var(--text);
+  border-radius:11px;
+  outline:none;
+}
+
+.field input:focus,
+.field select:focus{
+  border-color:var(--accent);
+}
+
+.form-actions{
+  display:flex;
+  gap:9px;
+  margin-top:12px;
+  flex-wrap:wrap;
+}
+
+/* TABLE */
+
+.table-wrap{
+  overflow:auto;
+  border:1px solid var(--line);
+  border-radius:14px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:850px;
+}
+
+th,td{
+  padding:12px 13px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  font-size:13px;
+}
+
+th{
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.7px;
+  background:var(--panel2);
+}
+
+tr:last-child td{
+  border-bottom:0;
+}
+
+tbody tr:hover{
+  background:rgba(86,214,255,.035);
+}
+
+/* BADGES */
+
+.badge{
+  display:inline-flex;
+  padding:5px 9px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:900;
+}
+
+.excellent{
+  background:rgba(70,214,154,.12);
+  color:var(--good);
+}
+
+.good{
+  background:rgba(86,214,255,.12);
+  color:var(--accent);
+}
+
+.average{
+  background:rgba(255,200,87,.12);
+  color:var(--warn);
+}
+
+.needs{
+  background:rgba(255,107,122,.12);
+  color:var(--bad);
+}
+
+/* BARS */
+
+.bar{
+  height:8px;
+  background:var(--line);
+  border-radius:99px;
+  overflow:hidden;
+}
+
+.bar i{
+  display:block;
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  border-radius:99px;
+}
+
+.subject-list{
+  display:grid;
+  gap:10px;
+}
+
+.subject-row{
+  display:grid;
+  grid-template-columns:120px 1fr 55px;
+  gap:10px;
+  align-items:center;
+  font-size:12px;
+}
+
+.subject-row span:first-child{
+  font-weight:800;
+}
+
+/* CHART */
+
+.chart{
+  height:270px;
+  position:relative;
+}
+
+.chart canvas{
+  width:100%;
+  height:100%;
+}
+
+.chart-legend{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:11px;
+}
+
+.dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  display:inline-block;
+  margin-right:5px;
+  background:var(--accent);
+}
+
+/* INSIGHTS */
+
+.alert{
+  padding:13px 14px;
+  border-radius:13px;
+  border:1px solid var(--line);
+  background:var(--panel2);
+  margin-bottom:9px;
+  font-size:13px;
+}
+
+.alert strong{
+  display:block;
+  margin-bottom:3px;
+}
+
+.alert.goodA{
+  border-color:rgba(70,214,154,.35);
+}
+
+.alert.warnA{
+  border-color:rgba(255,200,87,.35);
+}
+
+.alert.badA{
+  border-color:rgba(255,107,122,.35);
+}
+
+/* SEARCH */
+
+.search-row{
+  display:flex;
+  gap:9px;
+  flex-wrap:wrap;
+}
+
+.search-row input,
+.search-row select{
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--panel2);
+  color:var(--text);
+}
+
+/* KPI */
+
+.kpi{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid var(--line);
+}
+
+.kpi:last-child{
+  border-bottom:0;
+}
+
+.kpi span{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.kpi b{
+  font-size:16px;
+}
+
+/* EMPTY */
+
+.empty{
+  text-align:center;
+  padding:35px;
+  color:var(--muted);
+}
+
+/* FOOTER */
+
+.footer{
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+  padding:30px;
+}
+
+/* TOAST */
+
+.toast{
+  position:fixed;
+  right:22px;
+  bottom:22px;
+  background:var(--panel);
+  border:1px solid var(--accent);
+  padding:12px 15px;
+  border-radius:12px;
+  box-shadow:var(--shadow);
+  z-index:50;
+  display:none;
+}
+
+/* MODAL */
+
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
+  place-items:center;
+  z-index:40;
+  padding:20px;
+}
+
+.modal.show{
+  display:grid;
+}
+
+.modal-box{
+  max-width:650px;
+  width:100%;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:22px;
+  max-height:90vh;
+  overflow:auto;
+}
+
+.modal-box h2{
+  margin-top:0;
+}
+
+.mobile-menu{
+  display:none;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:1200px){
+
+  .stats{
+    grid-template-columns:repeat(3,1fr);
+  }
+
+  .two{
+    grid-template-columns:1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+
+@media(max-width:800px){
+
+  .sidebar{
+    transform:translateX(-100%);
+    transition:.25s;
+  }
+
+  .sidebar.open{
+    transform:translateX(0);
+  }
+
+  .main{
+    margin-left:0;
+    width:100%;
+    padding:18px;
+  }
+
+  .mobile-menu{
+    display:block;
+  }
+
+  .topbar{
+    align-items:flex-start;
+  }
+
+  .stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  .three{
+    grid-template-columns:1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .subject-row{
+    grid-template-columns:90px 1fr 45px;
+  }
+}
+
+@media(max-width:480px){
+
+  .stats{
+    grid-template-columns:1fr;
+  }
+
+  .topbar{
+    flex-direction:column;
+  }
+
+  .actions{
+    width:100%;
+  }
+
+  .actions .btn{
+    flex:1;
+  }
+
+  .card{
+    padding:15px;
+  }
+}
+
+/* PRINT */
+
+@media print{
+
+  .sidebar,
+  .actions,
+  .no-print,
+  .search-row,
+  .form-actions,
+  .footer{
+    display:none!important;
+  }
+
+  .main{
+    margin:0;
+    width:100%;
+    padding:10px;
+  }
+
+  body{
+    background:white;
+    color:black;
+  }
+
+  .card{
+    box-shadow:none;
+    border:1px solid #ddd;
+    background:white;
+    break-inside:avoid;
+  }
+
+  .section{
+    break-inside:avoid;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+
+  <div class="brand">
+    <div class="logo">EP</div>
+    <div>
+      <h2>EduPulse</h2>
+      <small>Performance Analytics</small>
+    </div>
+  </div>
+
+  <nav class="nav">
+    <button class="active" data-target="dashboard">⌂ Dashboard</button>
+    <button data-target="students">♙ Students</button>
+    <button data-target="entry">＋ Mark Entry</button>
+    <button data-target="analytics">◈ Analytics</button>
+    <button data-target="subjects">▦ Subjects</button>
+    <button data-target="reports">▤ Reports</button>
+  </nav>
+
+  <div class="sidebar-bottom">
+    <div class="tip">
+      <b>Teacher Toolkit</b>
+      <br><br>
+      Track marks, identify learning gaps, compare subjects and generate quick performance reports.
+    </div>
+  </div>
+
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<header class="topbar">
+
+  <div>
+
+    <button class="btn mobile-menu" onclick="toggleMenu()">☰</button>
+
+    <div class="eyebrow">
+      Smart Classroom Analytics
+    </div>
+
+    <h1>
+      Student Performance Dashboard
+    </h1>
+
+    <p class="subtitle">
+      A clean, teacher-friendly workspace for marks, insights and progress tracking.
+    </p>
+
+  </div>
+
+  <div class="actions">
+
+    <button class="btn" onclick="toggleTheme()">
+      ☾ Theme
+    </button>
+
+    <button class="btn" onclick="printReport()">
+      ⎙ Print
+    </button>
+
+    <button class="btn primary" onclick="loadDemo()">
+      ⚡ Demo Data
+    </button>
+
+  </div>
+
+</header>
+
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="section">
+
+  <div class="grid stats">
+
+    <div class="card stat">
+      <div class="label">Students</div>
+      <div class="value" id="sStudents">0</div>
+      <div class="sub">Students recorded</div>
+    </div>
+
+    <div class="card stat">
+      <div class="label">Class Average</div>
+      <div class="value" id="sAverage">0%</div>
+      <div class="sub">Overall percentage</div>
+    </div>
+
+    <div class="card stat">
+      <div class="label">Pass Rate</div>
+      <div class="value" id="sPass">0%</div>
+      <div class="sub">Students at 40%+</div>
+    </div>
+
+    <div class="card stat">
+      <div class="label">Top Score</div>
+      <div class="value" id="sTop">0%</div>
+      <div class="sub" id="sTopName">No student yet</div>
+    </div>
+
+    <div class="card stat">
+      <div class="label">At Risk</div>
+      <div class="value" id="sRisk">0</div>
+      <div class="sub">Needs attention</div>
+    </div>
+
+  </div>
+
+
+  <div class="grid two section">
+
+    <div class="card">
+
+      <div class="section-head">
+        <div>
+          <h2>Performance Overview</h2>
+          <p>Average percentage by student</p>
+        </div>
+      </div>
+
+      <div class="chart">
+        <canvas id="studentChart"></canvas>
+      </div>
+
+      <div class="chart-legend">
+        <span>
+          <i class="dot"></i>
+          Student average
+        </span>
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="section-head">
+        <div>
+          <h2>Quick Insights</h2>
+          <p>Automatically generated observations</p>
+        </div>
+      </div>
+
+      <div id="insights"></div>
+
+    </div>
+
+  </div>
+
+
+  <div class="grid two section">
+
+    <div class="card">
+
+      <div class="section-head">
+        <div>
+          <h2>Subject Performance</h2>
+          <p>Class average across subjects</p>
+        </div>
+      </div>
+
+      <div class="subject-list" id="subjectBars"></div>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="section-head">
+        <div>
+          <h2>Grade Distribution</h2>
+          <p>Current class snapshot</p>
+        </div>
+      </div>
+
+      <div class="chart">
+        <canvas id="gradeChart"></canvas>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- STUDENTS -->
+<section id="students" class="section">
+
+  <div class="card">
+
+    <div class="section-head">
+
+      <div>
+        <h2>Student Records</h2>
+        <p>
+          Search, filter, edit and review individual performance.
+        </p>
+      </div>
+
+      <div class="search-row no-print">
+
+        <input
+          id="search"
+          placeholder="Search student or ID..."
+          oninput="renderStudents()"
+        >
+
+        <select id="gradeFilter" onchange="renderStudents()">
+          <option value="">All grades</option>
+          <option>A+</option>
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+          <option>D</option>
+          <option>F</option>
+        </select>
+
+      </div>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Student</th>
+            <th>ID</th>
+            <th>Average</th>
+            <th>Grade</th>
+            <th>Performance</th>
+            <th>Status</th>
+            <th class="no-print">Actions</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="studentTable"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- MARK ENTRY -->
+<section id="entry" class="section">
+
+  <div class="card">
+
+    <div class="section-head">
+
+      <div>
+        <h2 id="formTitle">
+          Add Student Performance
+        </h2>
+
+        <p>
+          Enter marks for each subject. Results are calculated automatically.
+        </p>
+      </div>
+
+    </div>
+
+
+    <form id="studentForm" onsubmit="saveStudent(event)">
+
+      <input type="hidden" id="editId">
+
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Student Name *</label>
+          <input
+            id="name"
+            required
+            placeholder="e.g. Ananya Thomas"
+          >
+        </div>
+
+        <div class="field">
+          <label>Student ID *</label>
+          <input
+            id="sid"
+            required
+            placeholder="e.g. ST-001"
+          >
+        </div>
+
+        <div class="field">
+          <label>Class / Section</label>
+          <input
+            id="className"
+            placeholder="e.g. 10 A"
+          >
+        </div>
+
+        <div class="field">
+          <label>Exam / Assessment</label>
+          <input
+            id="exam"
+            placeholder="e.g. Term 1"
+          >
+        </div>
+
+      </div>
+
+
+      <div class="section-head" style="margin-top:20px">
+
+        <div>
+          <h2>Subject Marks</h2>
+          <p>Enter marks out of 100.</p>
+        </div>
+
+      </div>
+
+
+      <div class="form-grid" id="subjectInputs"></div>
+
+
+      <div class="form-actions">
+
+        <button class="btn primary" type="submit">
+          ✓ Save Performance
+        </button>
+
+        <button
+          class="btn"
+          type="button"
+          onclick="resetForm()"
+        >
+          Reset
+        </button>
+
+      </div>
+
+    </form>
+
+  </div>
+
+</section>
+
+
+<!-- ANALYTICS -->
+<section id="analytics" class="section">
+
+  <div class="grid two">
+
+    <div class="card">
+
+      <div class="section-head">
+        <div>
+          <h2>Subject Analytics</h2>
+          <p>Strengths and learning gaps.</p>
+        </div>
+      </div>
+
+      <div id="subjectAnalytics"></div>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="section-head">
+        <div>
+          <h2>Class KPIs</h2>
+          <p>Useful summary indicators.</p>
+        </div>
+      </div>
+
+      <div id="kpis"></div>
+
+    </div>
+
+  </div>
+
+
+  <div class="card section">
+
+    <div class="section-head">
+
+      <div>
+        <h2>Top & Support List</h2>
+        <p>
+          Use these lists to plan enrichment and intervention.
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="grid two">
+
+      <div>
+
+        <h3>Top Performers</h3>
+
+        <div id="topList"></div>
+
+      </div>
+
+
+      <div>
+
+        <h3>Students Needing Support</h3>
+
+        <div id="supportList"></div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- SUBJECTS -->
+<section id="subjects" class="section">
+
+  <div class="card">
+
+    <div class="section-head">
+
+      <div>
+        <h2>Subject Performance Matrix</h2>
+        <p>
+          Compare class averages and pass rates.
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+
+          <tr>
+            <th>Subject</th>
+            <th>Average</th>
+            <th>Pass Rate</th>
+            <th>Highest</th>
+            <th>Lowest</th>
+            <th>Level</th>
+          </tr>
+
+        </thead>
+
+        <tbody id="subjectTable"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<!-- REPORTS -->
+<section id="reports" class="section">
+
+  <div class="card">
+
+    <div class="section-head">
+
+      <div>
+        <h2>Reports & Data</h2>
+        <p>
+          Backup your records or create a printable report.
+        </p>
+      </div>
+
+    </div>
+
+
+    <div class="actions no-print">
+
+      <button class="btn primary" onclick="exportCSV()">
+        ⇩ Export CSV
+      </button>
+
+      <button class="btn" onclick="exportJSON()">
+        ⇩ Backup JSON
+      </button>
+
+      <button
+        class="btn"
+        onclick="document.getElementById('jsonFile').click()"
+      >
+        ⇧ Restore JSON
+      </button>
+
+      <button class="btn" onclick="printReport()">
+        ⎙ Print Report
+      </button>
+
+      <button class="btn danger" onclick="clearAll()">
+        ⌫ Clear All Data
+      </button>
+
+      <input
+        type="file"
+        id="jsonFile"
+        accept=".json"
+        hidden
+        onchange="importJSON(event)"
+      >
+
+    </div>
+
+
+    <div class="alert goodA" style="margin-top:14px">
+
+      <strong>Privacy-first storage</strong>
+
+      Your records are stored locally in this browser using
+      localStorage. They are not automatically uploaded to a server.
+
+    </div>
+
+  </div>
+
+</section>
+
+
+<div class="footer">
+  EduPulse Student Performance Analytics • Teacher Toolkit
+</div>
+
+</main>
+</div>
+
+
+<!-- MODAL -->
+
+<div class="modal" id="modal">
+
+  <div class="modal-box">
+
+    <div id="modalContent"></div>
+
+    <div style="margin-top:15px">
+
+      <button class="btn" onclick="closeModal()">
+        Close
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<div class="toast" id="toast"></div>
+
+
+<script>
+
+const SUBJECTS = [
+  "Mathematics",
+  "English",
+  "Science",
+  "Social Science",
+  "Hindi",
+  "Arabic",
+  "Computer",
+  "Malayalam"
+];
+
+let students =
+  JSON.parse(
+    localStorage.getItem("edupulse_students") || "[]"
+  );
+
+
+function esc(s){
+
+  return String(s ?? "")
+    .replace(/[&<>"']/g, m => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    }[m]));
+
+}
+
+
+function saveData(){
+
+  localStorage.setItem(
+    "edupulse_students",
+    JSON.stringify(students)
+  );
+
+}
+
+
+function avg(student){
+
+  let values =
+    SUBJECTS.map(
+      subject => Number(student.marks?.[subject]) || 0
+    );
+
+  return values.reduce(
+    (a,b) => a+b,
+    0
+  ) / SUBJECTS.length;
+
+}
+
+
+function grade(p){
+
+  if(p >= 90) return "A+";
+  if(p >= 80) return "A";
+  if(p >= 65) return "B";
+  if(p >= 50) return "C";
+  if(p >= 40) return "D";
+
+  return "F";
+
+}
+
+
+function gradeClass(g){
+
+  if(g === "A+" || g === "A")
+    return "excellent";
+
+  if(g === "B")
+    return "good";
+
+  if(g === "C" || g === "D")
+    return "average";
+
+  return "needs";
+
+}
+
+
+function status(p){
+
+  if(p >= 75) return "Excellent";
+  if(p >= 60) return "Good";
+  if(p >= 40) return "Pass";
+
+  return "Needs Support";
+
+}
+
+
+function pct(n){
+
+  return Math.round(n * 10) / 10;
+
+}
+
+
+function subjectStats(subject){
+
+  let values =
+    students.map(
+      student => Number(student.marks?.[subject]) || 0
+    );
+
+  if(!values.length){
+
+    return {
+      avg:0,
+      pass:0,
+      max:0,
+      min:0
+    };
+
+  }
+
+  return {
+
+    avg:
+      values.reduce((a,b)=>a+b,0) /
+      values.length,
+
+    pass:
+      values.filter(v=>v>=40).length /
+      values.length * 100,
+
+    max:
+      Math.max(...values),
+
+    min:
+      Math.min(...values)
+
+  };
+
+}
+
+
+function toast(message){
+
+  const box =
+    document.getElementById("toast");
+
+  box.textContent = message;
+
+  box.style.display = "block";
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer =
+    setTimeout(
+      ()=>box.style.display="none",
+      2200
+    );
+
+}
+
+
+function toggleMenu(){
+
+  document
+    .getElementById("sidebar")
+    .classList.toggle("open");
+
+}
+
+
+function toggleTheme(){
+
+  document
+    .body
+    .classList
+    .toggle("light");
+
+  localStorage.setItem(
+    "edupulse_theme",
+    document.body.classList.contains("light")
+      ? "light"
+      : "dark"
+  );
+
+  drawAll();
+
+}
+
+
+function navSetup(){
+
+  document
+    .querySelectorAll(".nav button")
+    .forEach(button => {
+
+      button.onclick = () => {
+
+        document
+          .querySelectorAll(".nav button")
+          .forEach(
+            item => item.classList.remove("active")
+          );
+
+        button.classList.add("active");
+
+        document
+          .getElementById(button.dataset.target)
+          .scrollIntoView({
+            behavior:"smooth"
+          });
+
+        document
+          .getElementById("sidebar")
+          .classList.remove("open");
+
+      };
+
+    });
+
+}
+
+
+function buildInputs(){
+
+  document.getElementById(
+    "subjectInputs"
+  ).innerHTML = SUBJECTS.map(subject => `
+
+    <div class="field">
+
+      <label>${subject}</label>
+
+      <input
+        type="number"
+        min="0"
+        max="100"
+        step="0.5"
+        id="mark-${subject}"
+        placeholder="0–100"
+      >
+
+    </div>
+
+  `).join("");
+
+}
+
+
+function saveStudent(event){
+
+  event.preventDefault();
+
+  const edit =
+    document.getElementById("editId").value;
+
+  let student = {
+
+    name:
+      document
+        .getElementById("name")
+        .value
+        .trim(),
+
+    id:
+      document
+        .getElementById("sid")
+        .value
+        .trim(),
+
+    className:
+      document
+        .getElementById("className")
+        .value
+        .trim(),
+
+    exam:
+      document
+        .getElementById("exam")
+        .value
+        .trim(),
+
+    marks:{}
+
+  };
+
+
+  SUBJECTS.forEach(subject => {
+
+    student.marks[subject] =
+      Math.max(
+        0,
+        Math.min(
+          100,
+          Number(
+            document
+              .getElementById(
+                "mark-" + subject
+              )
+              .value
+          ) || 0
+        )
+      );
+
+  });
+
+
+  if(edit){
+
+    const index =
+      students.findIndex(
+        student => student.id === edit
+      );
+
+    if(index >= 0){
+
+      students[index] = student;
+
+      toast("Student record updated");
+
+    }
+
+  }
+
+  else{
+
+    if(
+      students.some(
+        s =>
+          s.id.toLowerCase() ===
+          student.id.toLowerCase()
+      )
+    ){
+
+      toast("Student ID already exists");
+
+      return;
+
+    }
+
+    students.push(student);
+
+    toast("Student performance saved");
+
+  }
+
+
+  saveData();
+
+  resetForm();
+
+  drawAll();
+
+  document
+    .getElementById("students")
+    .scrollIntoView({
+      behavior:"smooth"
+    });
+
+}
+
+
+function resetForm(){
+
+  document
+    .getElementById("studentForm")
+    .reset();
+
+  document
+    .getElementById("editId")
+    .value = "";
+
+  document
+    .getElementById("formTitle")
+    .textContent =
+      "Add Student Performance";
+
+}
+
+
+function editStudent(id){
+
+  const student =
+    students.find(
+      item => item.id === id
+    );
+
+  if(!student) return;
+
+
+  document.getElementById("editId").value =
+    student.id;
+
+  document.getElementById("name").value =
+    student.name;
+
+  document.getElementById("sid").value =
+    student.id;
+
+  document.getElementById("className").value =
+    student.className || "";
+
+  document.getElementById("exam").value =
+    student.exam || "";
+
+
+  SUBJECTS.forEach(subject => {
+
+    document.getElementById(
+      "mark-" + subject
+    ).value =
+      student.marks[subject] ?? 0;
+
+  });
+
+
+  document.getElementById(
+    "formTitle"
+  ).textContent =
+    "Edit Student Performance";
+
+
+  document
+    .getElementById("entry")
+    .scrollIntoView({
+      behavior:"smooth"
+    });
+
+}
+
+
+function deleteStudent(id){
+
+  if(
+    !confirm(
+      "Delete this student record?"
+    )
+  ) return;
+
+
+  students =
+    students.filter(
+      student => student.id !== id
+    );
+
+
+  saveData();
+
+  drawAll();
+
+  toast("Record deleted");
+
+}
+
+
+function renderStudents(){
+
+  const query =
+    document
+      .getElementById("search")
+      .value
+      .toLowerCase();
+
+  const gradeFilter =
+    document.getElementById(
+      "gradeFilter"
+    ).value;
+
+
+  let filtered =
+    students.filter(student => {
+
+      const matchesSearch =
+        student.name
+          .toLowerCase()
+          .includes(query)
+        ||
+        student.id
+          .toLowerCase()
+          .includes(query);
+
+      const matchesGrade =
+        !gradeFilter ||
+        grade(avg(student)) === gradeFilter;
+
+      return matchesSearch &&
+             matchesGrade;
+
+    });
+
+
+  const body =
+    document.getElementById(
+      "studentTable"
+    );
+
+
+  if(!filtered.length){
+
+    body.innerHTML = `
+
+      <tr>
+
+        <td colspan="7">
+
+          <div class="empty">
+            No student records found.
+          </div>
+
+        </td>
+
+      </tr>
+
+    `;
+
+    return;
+
+  }
+
+
+  filtered.sort(
+    (a,b) => avg(b) - avg(a)
+  );
+
+
+  body.innerHTML =
+    filtered.map(student => {
+
+      const percentage =
+        avg(student);
+
+      const g =
+        grade(percentage);
+
+      const c =
+        gradeClass(g);
+
+
+      return `
+
+      <tr>
+
+        <td>
+
+          <b>
+            ${esc(student.name)}
+          </b>
+
+          <br>
+
+          <small style="color:var(--muted)">
+            ${esc(student.className || "")}
+          </small>
+
+        </td>
+
+
+        <td>
+          ${esc(student.id)}
+        </td>
+
+
+        <td>
+          <b>${pct(percentage)}%</b>
+        </td>
+
+
+        <td>
+
+          <span class="badge ${c}">
+            ${g}
+          </span>
+
+        </td>
+
+
+        <td>
+
+          <div class="bar">
+
+            <i
+              style="width:${percentage}%"
+            ></i>
+
+          </div>
+
+        </td>
+
+
+        <td>
+
+          <span class="badge ${c}">
+            ${status(percentage)}
+          </span>
+
+        </td>
+
+
+        <td class="no-print">
+
+          <button
+            class="btn"
+            onclick="viewStudent('${encodeURIComponent(student.id)}')"
+          >
+            View
+          </button>
+
+          <button
+            class="btn"
+            onclick="editStudent('${esc(student.id)}')"
+          >
+            Edit
+          </button>
+
+          <button
+            class="btn danger"
+            onclick="deleteStudent('${esc(student.id)}')"
+          >
+            Delete
+          </button>
+
+        </td>
+
+      </tr>
+
+      `;
+
+    }).join("");
+
+}
+
+
+function viewStudent(encoded){
+
+  const id =
+    decodeURIComponent(encoded);
+
+  const student =
+    students.find(
+      item => item.id === id
+    );
+
+  if(!student) return;
+
+
+  const percentage =
+    avg(student);
+
+  const g =
+    grade(percentage);
+
+
+  document.getElementById(
+    "modalContent"
+  ).innerHTML = `
+
+    <h2>${esc(student.name)}</h2>
+
+    <p style="color:var(--muted)">
+      ${esc(student.id)}
+      •
+      ${esc(student.className || "")}
+      •
+      ${esc(student.exam || "")}
+    </p>
+
+
+    <div class="grid two">
+
+      ${SUBJECTS.map(subject => `
+
+        <div class="kpi">
+
+          <span>
+            ${subject}
+          </span>
+
+          <b>
+            ${student.marks[subject]}%
+          </b>
+
+        </div>
+
+      `).join("")}
+
+    </div>
+
+
+    <div
+      class="alert ${gradeClass(g)}"
+      style="margin-top:15px"
+    >
+
+      <strong>
+        Overall:
+        ${pct(percentage)}%
+        • Grade ${g}
+      </strong>
+
+      ${status(percentage)}
+
+    </div>
+
+  `;
+
+
+  document
+    .getElementById("modal")
+    .classList.add("show");
+
+}
+
+
+function closeModal(){
+
+  document
+    .getElementById("modal")
+    .classList.remove("show");
+
+}
+
+
+function updateDashboard(){
+
+  document.getElementById(
+    "sStudents"
+  ).textContent =
+    students.length;
+
+
+  const overall =
+    students.length
+      ? students.reduce(
+          (sum,student)=>
+            sum + avg(student),
+          0
+        ) / students.length
+      : 0;
+
+
+  document.getElementById(
+    "sAverage"
+  ).textContent =
+    pct(overall) + "%";
+
+
+  const passRate =
+    students.length
+      ? Math.round(
+          students.filter(
+            student => avg(student) >= 40
+          ).length /
+          students.length *
+          100
+        )
+      : 0;
+
+
+  document.getElementById(
+    "sPass"
+  ).textContent =
+    passRate + "%";
+
+
+  const top =
+    [...students]
+      .sort(
+        (a,b) => avg(b)-avg(a)
+      )[0];
+
+
+  document.getElementById(
+    "sTop"
+  ).textContent =
+    top
+      ? pct(avg(top)) + "%"
+      : "0%";
+
+
+  document.getElementById(
+    "sTopName"
+  ).textContent =
+    top
+      ? top.name
+      : "No student yet";
+
+
+  document.getElementById(
+    "sRisk"
+  ).textContent =
+    students.filter(
+      student => avg(student) < 40
+    ).length;
+
+}
+
+
+function renderInsights(){
+
+  const element =
+    document.getElementById(
+      "insights"
+    );
+
+
+  if(!students.length){
+
+    element.innerHTML = `
+
+      <div class="empty">
+        Add students to generate insights.
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  const overall =
+    students.reduce(
+      (sum,student)=>
+        sum + avg(student),
+      0
+    ) / students.length;
+
+
+  const stats =
+    SUBJECTS
+      .map(subject => ({
+        subject,
+        ...subjectStats(subject)
+      }))
+      .sort(
+        (a,b)=>b.avg-a.avg
+      );
+
+
+  const strongest =
+    stats[0];
+
+  const weakest =
+    stats[stats.length-1];
+
+
+  const risk =
+    students.filter(
+      student => avg(student)<40
+    ).length;
+
+
+  element.innerHTML = `
+
+    <div class="alert goodA">
+
+      <strong>
+        Class average: ${pct(overall)}%
+      </strong>
+
+      ${
+        overall >= 75
+          ? "The class is showing strong overall performance."
+          : "Use the subject breakdown to target areas needing reinforcement."
+      }
+
+    </div>
+
+
+    <div class="alert">
+
+      <strong>
+        Strongest subject:
+        ${esc(strongest.subject)}
+      </strong>
+
+      Class average
+      ${pct(strongest.avg)}%.
+
+    </div>
+
+
+    <div class="alert warnA">
+
+      <strong>
+        Priority subject:
+        ${esc(weakest.subject)}
+      </strong>
+
+      Class average
+      ${pct(weakest.avg)}%.
+
+      Consider revision or targeted practice.
+
+    </div>
+
+
+    <div class="alert ${risk ? "badA" : "goodA"}">
+
+      <strong>
+        ${risk}
+        student${risk===1 ? "" : "s"}
+        below 40%
+      </strong>
+
+      ${
+        risk
+          ? "Consider individual intervention plans."
+          : "No student is currently below the pass threshold."
+      }
+
+    </div>
+
+  `;
+
+}
+
+
+function renderSubjects(){
+
+  const bars =
+    document.getElementById(
+      "subjectBars"
+    );
+
+
+  const stats =
+    SUBJECTS
+      .map(subject => ({
+        subject,
+        ...subjectStats(subject)
+      }))
+      .sort(
+        (a,b)=>b.avg-a.avg
+      );
+
+
+  bars.innerHTML =
+    stats.map(item => `
+
+      <div class="subject-row">
+
+        <span>
+          ${esc(item.subject)}
+        </span>
+
+        <div class="bar">
+
+          <i
+            style="width:${item.avg}%"
+          ></i>
+
+        </div>
+
+        <b>
+          ${pct(item.avg)}%
+        </b>
+
+      </div>
+
+    `).join("");
+
+
+  document.getElementById(
+    "subjectAnalytics"
+  ).innerHTML =
+    stats.map(item => `
+
+      <div class="kpi">
+
+        <span>
+
+          ${esc(item.subject)}
+
+          <small>
+            (${Math.round(item.pass)}% pass)
+          </small>
+
+        </span>
+
+        <b>
+          ${pct(item.avg)}%
+        </b>
+
+      </div>
+
+    `).join("");
+
+
+  document.getElementById(
+    "subjectTable"
+  ).innerHTML =
+    stats.map(item => `
+
+      <tr>
+
+        <td>
+          <b>
+            ${esc(item.subject)}
+          </b>
+        </td>
+
+        <td>
+          ${pct(item.avg)}%
+        </td>
+
+        <td>
+          ${Math.round(item.pass)}%
+        </td>
+
+        <td>
+          ${item.max}%
+        </td>
+
+        <td>
+          ${item.min}%
+        </td>
+
+        <td>
+
+          <span
+            class="badge
+            ${gradeClass(grade(item.avg))}"
+          >
+
+            ${
+              item.avg >= 75
+                ? "Strong"
+                : item.avg >= 50
+                  ? "Developing"
+                  : "Priority"
+            }
+
+          </span>
+
+        </td>
+
+      </tr>
+
+    `).join("");
+
+}
+
+
+function renderAnalytics(){
+
+  if(!students.length){
+
+    document.getElementById(
+      "kpis"
+    ).innerHTML = `
+
+      <div class="empty">
+        No data yet.
+      </div>
+
+    `;
+
+    document.getElementById(
+      "topList"
+    ).innerHTML = "";
+
+    document.getElementById(
+      "supportList"
+    ).innerHTML = "";
+
+    return;
+
+  }
+
+
+  const overall =
+    students.reduce(
+      (sum,student)=>
+        sum + avg(student),
+      0
+    ) / students.length;
+
+
+  const top =
+    [...students]
+      .sort(
+        (a,b)=>avg(b)-avg(a)
+      )
+      .slice(0,5);
+
+
+  const support =
+    [...students]
+      .sort(
+        (a,b)=>avg(a)-avg(b)
+      )
+      .slice(0,5);
+
+
+  document.getElementById(
+    "kpis"
+  ).innerHTML = `
+
+    <div class="kpi">
+      <span>Class average</span>
+      <b>${pct(overall)}%</b>
+    </div>
+
+    <div class="kpi">
+      <span>Highest score</span>
+      <b>${pct(avg(top[0]))}%</b>
+    </div>
+
+    <div class="kpi">
+      <span>Students ≥ 75%</span>
+      <b>
+        ${students.filter(s=>avg(s)>=75).length}
+      </b>
+    </div>
+
+    <div class="kpi">
+      <span>Students 40–74%</span>
+      <b>
+        ${
+          students.filter(
+            s=>avg(s)>=40 && avg(s)<75
+          ).length
+        }
+      </b>
+    </div>
+
+    <div class="kpi">
+      <span>Students &lt; 40%</span>
+      <b>
+        ${
+          students.filter(
+            s=>avg(s)<40
+          ).length
+        }
+      </b>
+    </div>
+
+  `;
+
+
+  document.getElementById(
+    "topList"
+  ).innerHTML =
+    top.map(
+      (student,index) => `
+
+        <div class="alert goodA">
+
+          <strong>
+            #${index+1}
+            ${esc(student.name)}
+          </strong>
+
+          ${pct(avg(student))}%
+          • Grade ${grade(avg(student))}
+
+        </div>
+
+      `
+    ).join("");
+
+
+  const supportStudents =
+    support.filter(
+      student => avg(student)<60
+    );
+
+
+  document.getElementById(
+    "supportList"
+  ).innerHTML =
+    supportStudents.length
+
+      ? supportStudents.map(
+          student => `
+
+            <div
+              class="alert
+              ${
+                avg(student)<40
+                  ? "badA"
+                  : "warnA"
+              }"
+            >
+
+              <strong>
+                ${esc(student.name)}
+              </strong>
+
+              ${pct(avg(student))}%
+              • ${status(avg(student))}
+
+            </div>
+
+          `
+        ).join("")
+
+      : `
+
+        <div class="alert goodA">
+
+          <strong>
+            No immediate support list.
+          </strong>
+
+          All students are at 60% or above.
+
+        </div>
+
+      `;
+
+}
+
+
+/* BAR CHART */
+
+function drawBarChart(
+  canvasId,
+  labels,
+  data
+){
+
+  const canvas =
+    document.getElementById(
+      canvasId
+    );
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  const dpr =
+    devicePixelRatio || 1;
+
+  const width =
+    canvas.clientWidth;
+
+  const height =
+    canvas.clientHeight;
+
+
+  canvas.width =
+    width * dpr;
+
+  canvas.height =
+    height * dpr;
+
+
+  ctx.scale(dpr,dpr);
+
+  ctx.clearRect(
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  if(!data.length){
+
+    ctx.fillStyle =
+      getComputedStyle(document.body)
+        .getPropertyValue("--muted");
+
+    ctx.font =
+      "14px system-ui";
+
+    ctx.textAlign =
+      "center";
+
+    ctx.fillText(
+      "Add student data to view chart",
+      width/2,
+      height/2
+    );
+
+    return;
+
+  }
+
+
+  const max =
+    Math.max(100,...data);
+
+  const left = 38;
+  const bottom = 35;
+  const top = 15;
+
+  const plotHeight =
+    height-top-bottom;
+
+  const plotWidth =
+    width-left-12;
+
+
+  ctx.strokeStyle =
+    getComputedStyle(document.body)
+      .getPropertyValue("--line");
+
+  ctx.lineWidth=1;
+
+
+  [0,25,50,75,100].forEach(value=>{
+
+    const y =
+      top +
+      plotHeight -
+      (value/max)*plotHeight;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(left,y);
+
+    ctx.lineTo(width-12,y);
+
+    ctx.stroke();
+
+
+    ctx.fillStyle =
+      getComputedStyle(document.body)
+        .getPropertyValue("--muted");
+
+    ctx.font =
+      "10px system-ui";
+
+    ctx.textAlign =
+      "right";
+
+    ctx.fillText(
+      value+"%",
+      left-5,
+      y+3
+    );
+
+  });
+
+
+  const gap =
+    plotWidth/data.length;
+
+  const barWidth =
+    Math.min(38,gap*.62);
+
+
+  data.forEach((value,index)=>{
+
+    const barHeight =
+      (value/max)*plotHeight;
+
+    const x =
+      left +
+      index*gap +
+      (gap-barWidth)/2;
+
+    const y =
+      top +
+      plotHeight -
+      barHeight;
+
+
+    ctx.fillStyle =
+      getComputedStyle(document.body)
+        .getPropertyValue("--accent");
+
+
+    ctx.fillRect(
+      x,
+      y,
+      barWidth,
+      barHeight
+    );
+
+
+    ctx.fillStyle =
+      getComputedStyle(document.body)
+        .getPropertyValue("--muted");
+
+    ctx.font =
+      "10px system-ui";
+
+    ctx.textAlign =
+      "center";
+
+
+    let label =
+      labels[index];
+
+
+    if(label.length > 10)
+      label =
+        label.slice(0,9)+"…";
+
+
+    ctx.fillText(
+      label,
+      x+barWidth/2,
+      height-17
+    );
+
+  });
+
+}
+
+
+/* GRADE CHART */
+
+function drawGradeChart(){
+
+  const canvas =
+    document.getElementById(
+      "gradeChart"
+    );
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  const dpr =
+    devicePixelRatio || 1;
+
+  const width =
+    canvas.clientWidth;
+
+  const height =
+    canvas.clientHeight;
+
+
+  canvas.width =
+    width*dpr;
+
+  canvas.height =
+    height*dpr;
+
+
+  ctx.scale(dpr,dpr);
+
+  ctx.clearRect(
+    0,
+    0,
+    width,
+    height
+  );
+
+
+  const grades =
+    ["A+","A","B","C","D","F"];
+
+
+  const counts =
+    grades.map(
+      g =>
+        students.filter(
+          s => grade(avg(s))===g
+        ).length
+    );
+
+
+  const total =
+    students.length;
+
+
+  if(!total){
+
+    ctx.fillStyle =
+      getComputedStyle(document.body)
+        .getPropertyValue("--muted");
+
+    ctx.font =
+      "14px system-ui";
+
+    ctx.textAlign =
+      "center";
+
+    ctx.fillText(
+      "No grade data yet",
+      width/2,
+      height/2
+    );
+
+    return;
+
+  }
+
+
+  const cx =
+    width/2;
+
+  const cy =
+    height/2-8;
+
+  const radius =
+    Math.min(width,height)*.33;
+
+
+  let start =
+    -Math.PI/2;
+
+
+  const variables =
+    [
+      "--good",
+      "--accent",
+      "--accent2",
+      "--warn",
+      "--bad",
+      "--muted"
+    ];
+
+
+  counts.forEach(
+    (count,index)=>{
+
+      const end =
+        start +
+        (count/total) *
+        Math.PI*2;
+
+
+      ctx.beginPath();
+
+      ctx.moveTo(
+        cx,
+        cy
+      );
+
+      ctx.arc(
+        cx,
+        cy,
+        radius,
+        start,
+        end
+      );
+
+      ctx.closePath();
+
+
+      ctx.fillStyle =
+        getComputedStyle(document.body)
+          .getPropertyValue(
+            variables[index]
+          );
+
+
+      ctx.fill();
+
+      start=end;
+
+    }
+  );
+
+
+  ctx.beginPath();
+
+  ctx.fillStyle =
+    getComputedStyle(document.body)
+      .getPropertyValue("--panel");
+
+  ctx.arc(
+    cx,
+    cy,
+    radius*.55,
+    0,
+    Math.PI*2
+  );
+
+  ctx.fill();
+
+
+  ctx.fillStyle =
+    getComputedStyle(document.body)
+      .getPropertyValue("--text");
+
+  ctx.textAlign =
+    "center";
+
+  ctx.font =
+    "900 22px system-ui";
+
+  ctx.fillText(
+    total,
+    cx,
+    cy+5
+  );
+
+
+  ctx.font =
+    "11px system-ui";
+
+  ctx.fillStyle =
+    getComputedStyle(document.body)
+      .getPropertyValue("--muted");
+
+  ctx.fillText(
+    "students",
+    cx,
+    cy+22
+  );
+
+
+  let x=12;
+  let y=15;
+
+
+  grades.forEach(
+    (g,index)=>{
+
+      ctx.fillStyle =
+        getComputedStyle(document.body)
+          .getPropertyValue(
+            variables[index]
+          );
+
+      ctx.fillRect(
+        x,
+        y,
+        9,
+        9
+      );
+
+
+      ctx.fillStyle =
+        getComputedStyle(document.body)
+          .getPropertyValue("--muted");
+
+      ctx.textAlign =
+        "left";
+
+      ctx.font =
+        "10px system-ui";
+
+      ctx.fillText(
+        g+" "+counts[index],
+        x+14,
+        y+8
+      );
+
+
+      x+=62;
+
+    }
+  );
+
+}
+
+
+/* DEMO DATA */
+
+function loadDemo(){
+
+  students = [
+
+    {
+      name:"Ananya Thomas",
+      id:"ST-001",
+      className:"10 A",
+      exam:"Term 1",
+
+      marks:{
+        Mathematics:94,
+        English:88,
+        Science:91,
+        "Social Science":86,
+        Hindi:90,
+        Arabic:84,
+        Computer:96,
+        Malayalam:89
+      }
+    },
+
+
+    {
+      name:"Rahul Nair",
+      id:"ST-002",
+      className:"10 A",
+      exam:"Term 1",
+
+      marks:{
+        Mathematics:78,
+        English:82,
+        Science:75,
+        "Social Science":79,
+        Hindi:73,
+        Arabic:80,
+        Computer:88,
+        Malayalam:77
+      }
+    },
+
+
+    {
+      name:"Aisha Rahman",
+      id:"ST-003",
+      className:"10 A",
+      exam:"Term 1",
+
+      marks:{
+        Mathematics:67,
+        English:71,
+        Science:62,
+        "Social Science":69,
+        Hindi:64,
+        Arabic:76,
+        Computer:72,
+        Malayalam:70
+      }
+    },
+
+
+    {
+      name:"Arjun Kumar",
+      id:"ST-004",
+      className:"10 A",
+      exam:"Term 1",
+
+      marks:{
+        Mathematics:42,
+        English:55,
+        Science:38,
+        "Social Science":48,
+        Hindi:51,
+        Arabic:45,
+        Computer:59,
+        Malayalam:47
+      }
+    },
+
+
+    {
+      name:"Meera Joseph",
+      id:"ST-005",
+      className:"10 A",
+      exam:"Term 1",
+
+      marks:{
+        Mathematics:96,
+        English:93,
+        Science:89,
+        "Social Science":92,
+        Hindi:95,
+        Arabic:91,
+        Computer:98,
+        Malayalam:94
+      }
+    },
+
+
+    {
+      name:"Fathima Ali",
+      id:"ST-006",
+      className:"10 A",
+      exam:"Term 1",
+
+      marks:{
+        Mathematics:35,
+        English:46,
+        Science:41,
+        "Social Science":39,
+        Hindi:44,
+        Arabic:52,
+        Computer:48,
+        Malayalam:43
+      }
+    }
+
+  ];
+
+
+  saveData();
+
+  drawAll();
+
+  toast("Demo class loaded");
+
+}
+
+
+/* EXPORT CSV */
+
+function csvCell(value){
+
+  return '"' +
+    String(value)
+      .replace(/"/g,'""') +
+    '"';
+
+}
+
+
+function exportCSV(){
+
+  let rows = [
+
+    [
+      "Student Name",
+      "Student ID",
+      "Class",
+      "Exam",
+      ...SUBJECTS,
+      "Average",
+      "Grade",
+      "Status"
+    ]
+
+  ];
+
+
+  students.forEach(student=>{
+
+    rows.push([
+
+      student.name,
+
+      student.id,
+
+      student.className || "",
+
+      student.exam || "",
+
+      ...SUBJECTS.map(
+        subject =>
+          student.marks[subject]
+      ),
+
+      pct(avg(student)),
+
+      grade(avg(student)),
+
+      status(avg(student))
+
+    ]);
+
+  });
+
+
+  const blob =
+    new Blob(
+      [
+        rows
+          .map(
+            row =>
+              row.map(csvCell).join(",")
+          )
+          .join("\n")
+      ],
+      {
+        type:"text/csv"
+      }
+    );
+
+
+  const link =
+    document.createElement("a");
+
+
+  link.href =
+    URL.createObjectURL(blob);
+
+  link.download =
+    "edupulse-student-performance.csv";
+
+  link.click();
+
+  URL.revokeObjectURL(
+    link.href
+  );
+
+  toast("CSV exported");
+
+}
+
+
+/* JSON BACKUP */
+
+function exportJSON(){
+
+  const blob =
+    new Blob(
+      [
+        JSON.stringify(
+          students,
+          null,
+          2
+        )
+      ],
+      {
+        type:"application/json"
+      }
+    );
+
+
+  const link =
+    document.createElement("a");
+
+
+  link.href =
+    URL.createObjectURL(blob);
+
+  link.download =
+    "edupulse-backup.json";
+
+  link.click();
+
+  URL.revokeObjectURL(
+    link.href
+  );
+
+  toast("Backup created");
+
+}
+
+
+/* JSON RESTORE */
+
+function importJSON(event){
+
+  const file =
+    event.target.files[0];
+
+  if(!file) return;
+
+
+  const reader =
+    new FileReader();
+
+
+  reader.onload = () => {
+
+    try{
+
+      const data =
+        JSON.parse(
+          reader.result
+        );
+
+
+      if(!Array.isArray(data))
+        throw new Error();
+
+
+      students = data;
+
+      saveData();
+
+      drawAll();
+
+      toast("Backup restored");
+
+    }
+
+    catch{
+
+      toast(
+        "Invalid backup file"
+      );
+
+    }
+
+  };
+
+
+  reader.readAsText(file);
+
+  event.target.value = "";
+
+}
+
+
+/* CLEAR */
+
+function clearAll(){
+
+  if(!students.length){
+
+    toast("No data to clear");
+
+    return;
+
+  }
+
+
+  if(
+    confirm(
+      "Delete ALL student records from this browser?"
+    )
+  ){
+
+    students=[];
+
+    saveData();
+
+    drawAll();
+
+    toast(
+      "All records cleared"
+    );
+
+  }
+
+}
+
+
+/* PRINT */
+
+function printReport(){
+
+  window.print();
+
+}
+
+
+/* MASTER RENDER */
+
+function drawAll(){
+
+  updateDashboard();
+
+  renderInsights();
+
+  renderStudents();
+
+  renderSubjects();
+
+  renderAnalytics();
+
+  drawBarChart(
+    "studentChart",
+    students.map(s=>s.name),
+    students.map(s=>avg(s))
+  );
+
+  drawGradeChart();
+
+}
+
+
+/* WINDOW EVENTS */
+
+window.addEventListener(
+  "resize",
+  () => {
+
+    drawBarChart(
+      "studentChart",
+      students.map(s=>s.name),
+      students.map(s=>avg(s))
+    );
+
+    drawGradeChart();
+
+  }
+);
+
+
+/* INITIALIZE */
+
+navSetup();
+
+buildInputs();
+
+
+if(
+  localStorage.getItem(
+    "edupulse_theme"
+  ) === "light"
+){
+
+  document
+    .body
+    .classList
+    .add("light");
+
+}
+
+
+drawAll();
+
+</script>
+
+</body>
+</html>
